@@ -1,10 +1,15 @@
 const WebSocket = require('ws');
 
-const ws = new WebSocket('ws://localhost:8080');
+const ws = new WebSocket('ws://localhost:8080/match');
 
 ws.on('open', function open() {
-  ws.send('something');
-  ws.close();
+
+  var reqMessage = {};
+  reqMessage.message = 'ReqRegister';
+  reqMessage.name = 'ezkiro';
+
+  ws.send(JSON.stringify(reqMessage));
+
 });
 
 ws.on('message', function incoming(data) {
