@@ -1,4 +1,4 @@
-const Message = require('message.js');
+const Message = require('./message.js');
 
 const HP_MAX = 10000;
 const MATCH_MAX = 1000;
@@ -21,10 +21,11 @@ class Player {
     constructor(name, ws){
         this.name = name;
         this.ws = ws;
-        this.hp = HP_MAX;
+        this.hp = 0;
         this.win = 0;
         this.draw = 0;
-        this.lose = 0;    
+        this.lose = 0;
+        this.status = 'NONE';    
     }
 
     damage(point) {
@@ -35,8 +36,8 @@ class Player {
         this.hp = HP_MAX;
     }
 
-    lastMessage(message) {
-        this.lastMessage = message;
+    setStatus(message) {
+        this.status = message;
     }
 }
 
@@ -137,48 +138,92 @@ class Round {
 
 
 class Game {
-    constructor(player1, player2) {
+    constructor() {
         //players
         this.players = new Map();
-        this.players.set(player1.ws, player1);
-        this.players.set(player2.ws, player2);
         this.rounds = [];
+        this.messageHandler = new Message();
+    }
 
+    addPlayer(name, ws) {
+        var player = new Player(name, ws);
+        this.players.set(player.ws, player);
     }
 
     start() {
-        this.players.forEach(function(player, key, map){
-            Message.reqGameStart(player.ws);
-        });
+        for (var player of this.players.values()) {
+            this.messageHandler.reqGameStart(player.ws);
+        }
+    }
+
+    setPlayerStatus(ws, status) {
+        var player = this.players.get(ws);
+        player.setStatus(status);
+    }
+
+    isSamePlyaerStatus() {
+        var temp = [];
+        for (var player of this.players.values()) {
+            temp.push(player);
+        }
+
+        if (temp[0].status == temp[1].status) {
+            return true;
+        }
+        return false;
     }
 
     startRound() {
+        console.log('[startRound]');
+
         this.players.forEach(function(player, key, map){
-            player.resetHP();
+            player.resetHp();
         });
 
         var newRound = new Round();
         newRound.start();
         this.rounds.push(newRound);
 
-        this.players.forEach(function(player, key, map){
-            Message.reqRoundStart(player.ws);
-        });
+        for (var player of this.players.values()) {
+            this.messageHandler.reqRoundStart(player.ws);
+        }
     }
 
     startMatch() {
+        console.log('[startMatch]');        
         var curRound = this.rounds.pop();
         curRound.startMatch();
         this.rounds.push(curRound);
 
-        this.players.forEach(function(player, key, map){
-            Message.reqMatchStart(player.ws);
-        });        
+        for (var player of this.players.values()) {
+            this.messageHandler.reqMatchStart(player.ws);
+        }
+    }
+
+    endMatch() {
+
     }
 
     endRound() {
         //check winner
 
+    }
+
+    handleAnsMessage(ws, message) {
+        this.setPlayerStatus(ws, message.message);
+
+        if (!this.isSamePlyaerStatus()) return;
+
+        switch (message.message) {
+            case "AnsGameStart":
+                this.startRound();
+                break;
+            case "AnsRoundStart":
+                this.startMatch();
+                break;
+            default:
+                console.log('[handleAnsMessage] message:%s', message.message);
+        }
     }
 }
 

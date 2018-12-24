@@ -27,6 +27,9 @@ ws.on('message', function incoming(message) {
     } else if (msgObj.message == 'ReqRoundStart') {
       response.message = 'AnsRoundStart';
       ws.send(JSON.stringify(response));
+    } else if (msgObj.message == 'ReqMatchStart') {
+      response.message = 'AnsMatchStart';
+      ws.send(JSON.stringify(response));
     }
   } catch (err) {
     console.log('[onMessage] exception:' + err.message);

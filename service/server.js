@@ -16,8 +16,7 @@ function start(port, matchHandler, viewHandler) {
                 ws.send('no wss1 handler!!')
                 return;
             }
-            var response = matchHandler(message, ws);      
-            ws.send(response);
+            matchHandler(message, ws);
           });
         
           ws.on('close', function close(code, reason){

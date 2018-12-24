@@ -1,11 +1,19 @@
+const Game = require('./game.js');
 
 const Users = new Map();
 // key: ws , value: match key
 const matchConnMap = new Map();
 
+// key: match key, value: Game
+const gameMap = new Map();
 
 function registerUser(name, ws) {
     Users.set(name, ws);
+}
+
+function findGameObj(ws) {
+    var matchKey = matchConnMap.get(ws);            
+    return gameMap.get(matchKey);
 }
 
 function startBattle(user1, user2) {
@@ -21,9 +29,11 @@ function startBattle(user1, user2) {
     matchConnMap.set(user1Ws, matchKey);
     matchConnMap.set(user2Ws, matchKey);
 
-    var reqGameStart = {"message":"ReqGameStart"};
-    user1Ws.send(JSON.stringify(reqGameStart));
-    user2Ws.send(JSON.stringify(reqGameStart));
+    var gameObj = new Game();
+    gameObj.addPlayer(user1, user1Ws);
+    gameObj.addPlayer(user2, user2Ws);    
+    gameMap.set(matchKey, gameObj);
+    gameObj.start();
 
     return 'AnsBattle';
 }
@@ -41,8 +51,8 @@ function handleMessage(message, ws) {
             registerUser(msgObj.name, ws);
             response.message = 'AnsRegister';
             response.result = true;
-    
-            return JSON.stringify(response);
+            ws.send(JSON.stringify(response)) 
+            return; 
         }
 
         if (msgObj.message == 'ReqBattle') {
@@ -51,26 +61,53 @@ function handleMessage(message, ws) {
 
             response.message = startBattle(user1, user2);
 
-            return JSON.stringify(response);
+            ws.send(JSON.stringify(response));
+            return;
         }
 
         if (msgObj.message == 'AnsGameStart') {
-            var matchKey = matchConnMap.get(ws);
+            var gameObj = findGameObj(ws);
+            gameObj.handleAnsMessage(ws, msgObj);
 
-            response.message = 'ReqRoundStart';
-            response.key = matchKey;
-            return JSON.stringify(response);
+            return;
+        }
+
+        if (msgObj.message == 'AnsRoundStart') {
+            var gameObj = findGameObj(ws);
+            gameObj.handleAnsMessage(ws, msgObj);
+
+            return;
+        }
+
+        if (msgObj.message == 'AnsMatchStart') {
+            var gameObj = findGameObj(ws);
+            gameObj.handleAnsMessage(ws, msgObj);
+
+            return;
+        }
+
+        if (msgObj.message == 'AnsMatchEnd') {
+            return;
+        }
+
+        if (msgObj.message == 'AnsRoundEnd') {
+            return;
+        }
+
+        if (msgObj.message == 'AnsGameEnd') {
+            return;
         }
 
         response.message = 'AnsError';
         response.detail = 'not support message:' +  msgObj.message;
-        return JSON.stringify(response);
+        ws.send(JSON.stringify(response));
+
     } catch (err) {
         console.log('[handleMessage] exception:' + err.message);
         var response = {}
         response.message = 'AnsError';
         response.detail = err.message;
-        return JSON.stringify(response);    
+        ws.send(JSON.stringify(response));    
     }
 }
 
