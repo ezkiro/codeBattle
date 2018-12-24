@@ -87,14 +87,23 @@ function handleMessage(message, ws) {
         }
 
         if (msgObj.message == 'AnsMatchEnd') {
+            var gameObj = findGameObj(ws);
+            gameObj.handleAnsMessage(ws, msgObj);
+
             return;
         }
 
         if (msgObj.message == 'AnsRoundEnd') {
+            var gameObj = findGameObj(ws);
+            gameObj.handleAnsMessage(ws, msgObj);
+
             return;
         }
 
         if (msgObj.message == 'AnsGameEnd') {
+            var gameObj = findGameObj(ws);
+            gameObj.handleAnsMessage(ws, msgObj);
+
             return;
         }
 
