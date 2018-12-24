@@ -1,7 +1,8 @@
 const Message = require('./message.js');
 
 const HP_MAX = 10000;
-const MATCH_MAX = 1000;
+//const MATCH_MAX = 1000;
+const MATCH_MAX = 3;
 const ROUND_MAX = 5;
 
 // card1 - card2 == 10 : defense
@@ -68,9 +69,14 @@ class Match {
             var myCardScore = CARD_SCORE.get(myCards[i]);
             var enemyCardScore = CARD_SCORE.get(enemyCards[i]);
 
-            console.log('[calDamage] idx:%d, myCardScore:%d, enemyCardScore:%d', i, myCardScore, enemyCardScore);            
+            //console.log('[calDamage] idx:%d, myCardScore:%d, enemyCardScore:%d', i, myCardScore, enemyCardScore);            
             //myCard is attack
             if (myCardScore < 10) {
+                //enemyCard is attack
+                if (enemyCardScore < 10) {
+                    // enemy attack success
+                    damage += enemyCardScore * DAMAGE;
+                }
                 continue;
             }
 
@@ -86,7 +92,7 @@ class Match {
             // enemy attack success
             damage += enemyCardScore * DAMAGE;
         }
-        console.log('[calDamage] damage:%d', damage);
+        console.log('[calDamage] %s damage:%d', myName, damage);
         return damage;
     }
 }
@@ -291,6 +297,9 @@ class Game {
 
         var player1 = playerArr[0];
         var player2 = playerArr[1];
+
+        console.log('[endGame] %s, win:%d, lose:%d, draw:%d', player1.name, player1.win, player1.lose, player1.draw);
+        console.log('[endGame] %s, win:%d, lose:%d, draw:%d', player2.name, player2.win, player2.lose, player2.draw);
 
         if (player1.win > player2.win) {
             //player1 is winner!
