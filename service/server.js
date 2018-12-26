@@ -1,8 +1,27 @@
 const http = require('http');
 const WebSocket = require('ws');
 const url = require('url');
+const fs = require('fs');
+const path = require('path');
 
-const server = http.createServer();
+const server = http.createServer(function(request, response){
+    console.log('[http server] request.url:%s', request.url);
+
+    if (request.url === '/index') {
+        let pathname = path.join(__dirname, '../public/index.html');
+        console.log('[http server] pathname:%s', pathname);
+        fs.readFile(pathname, function(err, data){
+            if(err){
+                response.statusCode = 500;
+                response.end(`Error getting the file: ${err}.`);
+              } else {
+                response.statusCode = 200;
+                response.setHeader('Content-type','text/html' );
+                response.end(data);
+              }
+        });
+    }
+});
 const wss1 = new WebSocket.Server({ noServer: true });
 const wss2 = new WebSocket.Server({ noServer: true });
 
@@ -25,7 +44,19 @@ function start(port, matchHandler, viewHandler) {
     });
     
     wss2.on('connection', function connection(ws) {
-      // ...
+        ws.on('message', function incoming(message) {
+            console.log('wss2 received: %s', message);
+            //handle mmessage
+            if (matchHandler === undefined) {
+                ws.send('no wss2 handler!!')
+                return;
+            }
+            matchHandler(message, ws);
+          });
+        
+          ws.on('close', function close(code, reason){
+              console.log('closed! code:%d, reason:%s', code, reason);
+          });
     });
     
     server.on('upgrade', function upgrade(request, socket, head) {

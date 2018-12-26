@@ -11,6 +11,14 @@ function registerUser(name, ws) {
     Users.set(name, ws);
 }
 
+function listUsers() {
+    var users = [];
+    for (var user of Users.keys()) {
+        users.push(user);
+    }
+    return users;
+}
+
 function findGameObj(ws) {
     var matchKey = matchConnMap.get(ws);            
     return gameMap.get(matchKey);
@@ -51,8 +59,15 @@ function handleMessage(message, ws) {
             registerUser(msgObj.name, ws);
             response.message = 'AnsRegister';
             response.result = true;
-            ws.send(JSON.stringify(response)) 
+            ws.send(JSON.stringify(response));
             return; 
+        }
+
+        if (msgObj.message == 'ReqPlayers') {            
+            response.message = 'AnsPlayers';
+            response.players = listUsers();
+            ws.send(JSON.stringify(response));
+            return;
         }
 
         if (msgObj.message == 'ReqBattle') {

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Code Battle</title>
+<meta charset="utf-8" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+// Let us open a web socket
+var ws = new WebSocket("ws://localhost:8080/view");
+
+$(document).ready(function(){
+
+    ws.onopen = function()
+    {
+        // Web Socket is connected, send data using send()
+        var reqPlayers = {
+            'message':'ReqPlayers'
+        };
+
+        ws.send(JSON.stringify(reqPlayers));
+    };
+
+    ws.onmessage = function (evt) 
+    { 
+        //alert("Message is received... data:" + evt.data);
+
+        var message = JSON.parse(evt.data);
+        if (message.message == 'AnsPlayers') {
+            for (var i = 0; i <  message.players.length; i++) {
+                $('#players').append('<li><strong>' + htmlEncode(message.players[i]) + '</strong></li>');                
+            }
+        } else if (message.message == 'AnsResults') {
+
+        }
+    };
+
+    ws.onclose = function()
+    { 
+        // websocket is closed.
+        alert("Connection is closed...");
+    };
+
+    $('#btnBattle').click(function () {
+        alert('ReqBattle ws:' + ws);
+        var reqBattle = {
+            'message':'ReqBattle',
+            'user1': $('#player1').value(),
+            'user2': $('#player2').value()
+        }
+        ws.send(JSON.stringify(reqBattle));
+    });
+});
+
+function htmlEncode(value) {
+    var encodedValue = $('<div />').text(value).html();
+    return encodedValue;
+}
+</script>
+
+</head>
+<body>    
+<h1>Code Battle</h1>
+<hr>
+<h2>Players</h2>
+<ul id="players"></ul>
+<input type="text" id="player1" width="100" placeholder="Input Player1">
+<input type="text" id="player2" width="100" placeholder="Input Player2">
+<br>
+<input type="button" id="btnBattle" width="200" value="Battle" />
+<hr>
+<h2>Result</h2>
+<ul id="result"></ul>
+</body>
+</html>
