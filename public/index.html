@@ -43,12 +43,19 @@ $(document).ready(function(){
     };
 
     $('#btnBattle').click(function () {
-        alert('ReqBattle ws:' + ws);
+        if ($('#player1').val() == '' || $('#player2').val() == '') {
+            alert('please input players!!');
+            return;
+        }
         var reqBattle = {
             'message':'ReqBattle',
-            'user1': $('#player1').value(),
-            'user2': $('#player2').value()
-        }
+        };
+
+        reqBattle.user1 = $('#player1').val();
+        reqBattle.user2 = $('#player2').val();
+
+        alert('ReqBattle :' + JSON.stringify(reqBattle));
+
         ws.send(JSON.stringify(reqBattle));
     });
 });
