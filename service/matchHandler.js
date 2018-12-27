@@ -109,6 +109,23 @@ function cleanUpUser(ws) {
     return userid;
 }
 
+function cleanUpBattle(ws) {
+    var matchKey = matchConnMap.get(ws);
+    var battleUsers = [];
+    for (var [key, value] of matchConnMap.entries()) {
+        if (matchKey == value) {
+            battleUsers.push(key);
+        }
+    }
+    //mark off battle users
+    if (battleUsers.length == 2) {
+        endBattle(battleUsers[0], false);
+        endBattle(battleUsers[1], true);                
+    } else {
+        endBattle(battleUsers[0], true);
+    }
+}
+
 function handleMessage(message, ws) {
     //{"message":"메세지 type", "필요한 parameters"}
     try {
@@ -196,6 +213,7 @@ function handleMessage(message, ws) {
             var userid = cleanUpUser(ws);
             msgObj.result = userid + ' is closed!!';
             gameObj.handleErrMessage(ws, msgObj);
+            cleanUpBattle(ws);
         }
 
         response.message = 'AnsError';
