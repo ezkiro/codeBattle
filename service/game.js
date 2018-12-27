@@ -364,7 +364,7 @@ class Game {
         this.setPlayerStatus(ws, message.message);
         this.checkMatch(ws, message);
 
-        if (!this.isSamePlyaerStatus()) return;
+        if (!this.isSamePlyaerStatus()) return false;
 
         switch (message.message) {
             case "AnsGameStart":
@@ -391,9 +391,18 @@ class Game {
                 }
                 break;
             case "AnsGameEnd":
+                this.messageHandler.notiBattleEnd(this.viewer);
                 break;
             default:
                 console.log('[handleAnsMessage] message:%s', message.message);
+        }
+
+        return true;
+    }
+
+    handleErrMessage(ws, message) {
+        if (message.message == 'ErrClientClose') {
+            this.messageHandler.notiError(this.viewer, message.result);          
         }
     }
 }

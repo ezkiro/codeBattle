@@ -55,7 +55,7 @@ class Message {
 
     //for viewer
     notiGameStart(ws, players) {
-        if (ws == undefined) return;
+        if (ws === undefined) return;
 
         var message = {"message":"NotiResult"};
         message.result = ' Game start!! ' + players[0].name + ' vs ' + players[1].name;
@@ -63,7 +63,7 @@ class Message {
     }
 
     notiRoundStart(ws, players, round) {
-        if (ws == undefined) return;
+        if (ws === undefined) return;
 
         var message = {"message":"NotiResult"};
         message.result = ' Round:' + round + ' start!! ' + players[0].name + 'hp:' + players[0].hp + ' vs ' + players[1].name + ' hp:' + players[1].hp;
@@ -71,7 +71,7 @@ class Message {
     }
 
     notiGameEnd(ws, winner, loser, isDraw) {
-        if (ws == undefined) return;
+        if (ws === undefined) return;
 
         var message = {"message":"NotiResult"};
         if (isDraw) {
@@ -86,7 +86,7 @@ class Message {
     }
 
     notiRoundEnd(ws, winner, loser, isDraw) {
-        if (ws == undefined) return;
+        if (ws === undefined) return;
 
         var message = {"message":"NotiResult"};
         if (isDraw) {
@@ -94,6 +94,21 @@ class Message {
         } else {
             message.result = 'Round end! winner: ' + winner.name + ' hp:' + winner.hp + ' vs loser: ' + loser.name + ' hp:' + loser.hp;
         }
+        this.sendMessage(ws, message);
+    }
+
+    notiBattleEnd(ws) {
+        if (ws === undefined) return;
+
+        var message = {"message":"NotiBattleEnd"};
+        this.sendMessage(ws, message);
+    }
+
+    notiError(ws, result) {
+        if (ws === undefined) return;
+
+        var message = {"message":"NotiError"};
+        message.result = result;
         this.sendMessage(ws, message);
     }
 }

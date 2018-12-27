@@ -28,12 +28,16 @@ $(document).ready(function(){
 
         var message = JSON.parse(evt.data);
         if (message.message == 'AnsPlayers') {
+            $('#players').empty();
             for (var i = 0; i <  message.players.length; i++) {
                 $('#players').append('<li><strong>' + htmlEncode(message.players[i]) + '</strong></li>');                
             }
         } else if (message.message == 'NotiResult') {
             $('#notiResults').append('<li>' + htmlEncode(message.result) + '</li>');
-        } else if (mesage.mesage == 'AnsError') {
+        } else if (message.message == 'NotiBattleEnd') {
+            var reqPlayers = {'message':'ReqPlayers'};
+            ws.send(JSON.stringify(reqPlayers));
+        } else if (message.message == 'NotiError') {
             alert('Error:' + message.result);
         }
     };
@@ -49,6 +53,10 @@ $(document).ready(function(){
             alert('please input players!!');
             return;
         }
+
+        //clear results logs
+        $('#notiResults').empty();
+
         var reqBattle = {
             'message':'ReqBattle',
         };
@@ -59,6 +67,9 @@ $(document).ready(function(){
         //alert('ReqBattle :' + JSON.stringify(reqBattle));
 
         ws.send(JSON.stringify(reqBattle));
+
+        var reqPlayers = {'message':'ReqPlayers'};
+        ws.send(JSON.stringify(reqPlayers));     
     });
 });
 

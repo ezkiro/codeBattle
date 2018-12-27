@@ -38,9 +38,13 @@ function start(port, matchHandler, viewHandler) {
             matchHandler(message, ws);
           });
         
-          ws.on('close', function close(code, reason){
-              console.log('closed! code:%d, reason:%s', code, reason);
-          });
+        ws.on('close', function close(code, reason){
+            console.log('client closed! code:%d, reason:%s', code, reason);
+            if (matchHandler === undefined) return;
+
+            var message = {'message':'ErrClientClose'};
+            matchHandler(JSON.stringify(message), ws);
+        });
     });
     
     wss2.on('connection', function connection(ws) {
@@ -55,7 +59,7 @@ function start(port, matchHandler, viewHandler) {
           });
         
           ws.on('close', function close(code, reason){
-              console.log('closed! code:%d, reason:%s', code, reason);
+              console.log('view client closed! code:%d, reason:%s', code, reason);
           });
     });
     

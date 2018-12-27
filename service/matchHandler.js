@@ -8,14 +8,19 @@ const matchConnMap = new Map();
 // key: match key, value: Game
 const gameMap = new Map();
 
+// key: ws, value: userid
+const battleUsers = new Map();
+
 function registerUser(name, ws) {
     Users.set(name, ws);
 }
 
 function listUsers() {
     var users = [];
-    for (var user of Users.keys()) {
-        users.push(user);
+    for (var [key, value] of Users.entries()) {
+        if (!battleUsers.has(value)) {
+            users.push(key);
+        }
     }
     return users;
 }
@@ -25,18 +30,43 @@ function findGameObj(ws) {
     return gameMap.get(matchKey);
 }
 
+function isBattleUser(userid) {
+    var userWs = Users.get(userid);
+    if (userWs == undefined) return false;
+
+    if (battleUsers.has(userWs)) return true;
+
+    return false;
+}
+
 function startBattle(user1, user2, viewerWs) {
+
+    var response = {};
+    //check battle users
+    if (isBattleUser(user1) || isBattleUser(user2))  {
+        response.message = 'NotiError';
+        response.result = user1 + ' or ' + user2 + ' is alreay battle status!';
+        return response;
+    }
+
     var user1Ws = Users.get(user1);
     var user2Ws = Users.get(user2);
 
     if (user1Ws === undefined || user2Ws === undefined) {
         console.log('not found user websocket! user1:%s , user2:%s', user1, user2);
-        return 'AnsError';
+
+        response.message = 'NotiError';
+        response.result = user1 + ' or ' + user2 + ' is not found!';
+        return response;
     }
 
     var matchKey = user1 + ':' + user2;
     matchConnMap.set(user1Ws, matchKey);
     matchConnMap.set(user2Ws, matchKey);
+
+    //mark on battle users
+    battleUsers.set(user1Ws, user1);
+    battleUsers.set(user2Ws, user2);
 
     var gameObj = new Game();
     gameObj.setViewer(viewerWs);
@@ -45,7 +75,38 @@ function startBattle(user1, user2, viewerWs) {
     gameMap.set(matchKey, gameObj);
     gameObj.start();
 
-    return 'AnsBattle';
+    response.message = 'AnsBattle';
+
+    return response;
+}
+
+function endBattle(ws, isAll) {
+    var matchKey = matchConnMap.get(ws);
+    //remove matchKey from matchConnMap
+    matchConnMap.delete(ws);
+    //mark off battle users
+    battleUsers.delete(ws);
+
+    //remove GameObj from gameMap
+    if (isAll) {
+        console.log('[endBattle] remove gameObj:' + matchKey);
+        gameMap.delete(matchKey);
+    }
+}
+
+function cleanUpUser(ws) {
+    //remove user from Users
+    var userid = undefined;
+    for (var [key, value] of Users.entries()) {
+        if (ws == value) {
+            userid = key;
+        }
+    }
+    
+    if (userid != undefined) {
+        Users.delete(userid);
+    }
+    return userid;
 }
 
 function handleMessage(message, ws) {
@@ -76,7 +137,7 @@ function handleMessage(message, ws) {
             var user1 = msgObj.user1;
             var user2 = msgObj.user2;
 
-            response.message = startBattle(user1, user2, ws);
+            response = startBattle(user1, user2, ws);
 
             ws.send(JSON.stringify(response));
             return;
@@ -119,9 +180,22 @@ function handleMessage(message, ws) {
 
         if (msgObj.message == 'AnsGameEnd') {
             var gameObj = findGameObj(ws);
-            gameObj.handleAnsMessage(ws, msgObj);
+            var isAll = gameObj.handleAnsMessage(ws, msgObj);
 
+            endBattle(ws, isAll);
             return;
+        }
+
+        if (msgObj.message == 'ErrClientClose') {
+            var gameObj = findGameObj(ws);
+            if (gameObj == undefined) {
+                cleanUpUser(ws);
+                return;
+            }
+
+            var userid = cleanUpUser(ws);
+            msgObj.result = userid + ' is closed!!';
+            gameObj.handleErrMessage(ws, msgObj);
         }
 
         response.message = 'AnsError';
@@ -130,10 +204,6 @@ function handleMessage(message, ws) {
 
     } catch (err) {
         console.log('[handleMessage] exception:' + err.message);
-        var response = {}
-        response.message = 'AnsError';
-        response.detail = err.message;
-        ws.send(JSON.stringify(response));    
     }
 }
 
