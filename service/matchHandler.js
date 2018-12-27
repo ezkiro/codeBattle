@@ -1,5 +1,6 @@
 const Game = require('./game.js');
 
+// key: userid , value: ws
 const Users = new Map();
 // key: ws , value: match key
 const matchConnMap = new Map();
@@ -24,7 +25,7 @@ function findGameObj(ws) {
     return gameMap.get(matchKey);
 }
 
-function startBattle(user1, user2) {
+function startBattle(user1, user2, viewerWs) {
     var user1Ws = Users.get(user1);
     var user2Ws = Users.get(user2);
 
@@ -38,6 +39,7 @@ function startBattle(user1, user2) {
     matchConnMap.set(user2Ws, matchKey);
 
     var gameObj = new Game();
+    gameObj.setViewer(viewerWs);
     gameObj.addPlayer(user1, user1Ws);
     gameObj.addPlayer(user2, user2Ws);    
     gameMap.set(matchKey, gameObj);
@@ -74,7 +76,7 @@ function handleMessage(message, ws) {
             var user1 = msgObj.user1;
             var user2 = msgObj.user2;
 
-            response.message = startBattle(user1, user2);
+            response.message = startBattle(user1, user2, ws);
 
             ws.send(JSON.stringify(response));
             return;

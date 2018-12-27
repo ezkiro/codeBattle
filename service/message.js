@@ -52,6 +52,50 @@ class Message {
         message.result = result;
         this.sendMessage(ws, message);
     }
+
+    //for viewer
+    notiGameStart(ws, players) {
+        if (ws == undefined) return;
+
+        var message = {"message":"NotiResult"};
+        message.result = ' Game start!! ' + players[0].name + ' vs ' + players[1].name;
+        this.sendMessage(ws, message);
+    }
+
+    notiRoundStart(ws, players, round) {
+        if (ws == undefined) return;
+
+        var message = {"message":"NotiResult"};
+        message.result = ' Round:' + round + ' start!! ' + players[0].name + 'hp:' + players[0].hp + ' vs ' + players[1].name + ' hp:' + players[1].hp;
+        this.sendMessage(ws, message);
+    }
+
+    notiGameEnd(ws, winner, loser, isDraw) {
+        if (ws == undefined) return;
+
+        var message = {"message":"NotiResult"};
+        if (isDraw) {
+            message.result = 'Game End! draw!! ' + winner.name + ' win:' + winner.win + ' vs ' + loser.name + ' win:' + loser.win;
+        } else {
+            var winMsg = 'winner: ' + winner.name + ' win:' + winner.win + ' lose:' + winner.lose + ' draw:' + winner.draw;
+            var loseMsg = 'loser:  ' + loser.name + ' win:' + loser.win + ' lose:' + loser.lose + ' draw:' + loser.draw;            
+            message.result = 'Game End! ' + winMsg + ' vs ' + loseMsg;
+        }
+
+        this.sendMessage(ws, message);
+    }
+
+    notiRoundEnd(ws, winner, loser, isDraw) {
+        if (ws == undefined) return;
+
+        var message = {"message":"NotiResult"};
+        if (isDraw) {
+            message.result = 'Round end! draw!! ' + winner.name + ' hp:' + winner.hp + ' vs ' + loser.name + ' hp:' + loser.hp;
+        } else {
+            message.result = 'Round end! winner: ' + winner.name + ' hp:' + winner.hp + ' vs loser: ' + loser.name + ' hp:' + loser.hp;
+        }
+        this.sendMessage(ws, message);
+    }
 }
 
 module.exports = Message;

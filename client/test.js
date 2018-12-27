@@ -4,7 +4,9 @@ const ws = new WebSocket('ws://localhost:8080/match');
 
 const userId = process.argv[2];
 
-const CARDS = ['AH','AH','AH','AH','AH','DH','DH','DH','DH','DH'];
+//const CARDS = ['AH','AH','AH','AH','AH','DH','DH','DH','DH','DH'];
+
+const CARDS = ['AH','AB','AL','AH','AH','DH','DB','DL','DH','DH'];
 
 function shuffle(a) {
   for (let i = a.length - 1; i > 0; i--) {

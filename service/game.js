@@ -1,8 +1,8 @@
 const Message = require('./message.js');
 
 const HP_MAX = 10000;
-//const MATCH_MAX = 1000;
-const MATCH_MAX = 3;
+const MATCH_MAX = 1000;
+//const MATCH_MAX = 3;
 const ROUND_MAX = 5;
 
 // card1 - card2 == 10 : defense
@@ -124,13 +124,18 @@ class Round {
         player1.damage(player1Damage);
         player2.damage(player2Damage);
 
-        console.log('[Round::endMatch] %s hp:%d vs %s hp:%d', player1.name, player1.hp, player2.name, player2.hp);
+        console.log('[Round::endMatch] match:%d %s hp:%d vs %s hp:%d', this.matchCnt, player1.name, player1.hp, player2.name, player2.hp);
     }
 
-    isRoundEnd() {
+    isRoundEnd(player1, player2) {
         if (this.matchCnt >= MATCH_MAX) {
             return true;
         }
+
+        if (player1.hp <= 0 || player2.hp <= 0) {
+            return true;
+        }
+
         return false;
     }
 
@@ -150,15 +155,23 @@ class Game {
         this.messageHandler = new Message();
     }
 
+    setViewer(ws) {
+        this.viewer = ws;
+    }
+
     addPlayer(name, ws) {
         var player = new Player(name, ws);
         this.players.set(player.ws, player);
     }
 
     start() {
+        var playerArr = [];
         for (var player of this.players.values()) {
             this.messageHandler.reqGameStart(player.ws);
+            playerArr.push(player);
         }
+
+        this.messageHandler.notiGameStart(this.viewer, playerArr);
     }
 
     setPlayerStatus(ws, status) {
@@ -189,9 +202,13 @@ class Game {
         newRound.start();
         this.rounds.push(newRound);
 
+        var playerArr = [];
         for (var player of this.players.values()) {
             this.messageHandler.reqRoundStart(player.ws);
+            playerArr.push(player);
         }
+
+        this.messageHandler.notiRoundStart(this.viewer, playerArr, this.rounds.length);
     }
 
     startMatch() {
@@ -237,7 +254,13 @@ class Game {
     isRoundEnd() {
         var curRound = this.rounds.pop();
         this.rounds.push(curRound);
-        return curRound.isRoundEnd();
+
+        var playerArr = [];
+        for (var player of this.players.values()) {
+            playerArr.push(player);
+        }
+
+        return curRound.isRoundEnd(playerArr[0], playerArr[1]);
     }
 
     endRound() {
@@ -260,6 +283,9 @@ class Game {
             curRound.end(player1.name, player2.name, "");
             this.messageHandler.reqRoundEnd(player1.ws, 'win');
             this.messageHandler.reqRoundEnd(player2.ws, 'lose');
+
+            //for viewr
+            this.messageHandler.notiRoundEnd(this.viewer, player1, player2, false);
         } else if (player1.hp < player2.hp) {
             //player2 is winner
             player2.win += 1;
@@ -268,6 +294,9 @@ class Game {
             curRound.end(player2.name, player1.name, "");                        
             this.messageHandler.reqRoundEnd(player2.ws, 'win');
             this.messageHandler.reqRoundEnd(player1.ws, 'lose');
+
+            //for viewr
+            this.messageHandler.notiRoundEnd(this.viewer, player2, player1, false);
         } else {
             //draw!!
             player1.draw += 1;
@@ -276,6 +305,9 @@ class Game {
             curRound.end("", "", "draw");
             this.messageHandler.reqRoundEnd(player1.ws, 'draw');
             this.messageHandler.reqRoundEnd(player2.ws, 'draw');
+
+            //for viewr
+            this.messageHandler.notiRoundEnd(this.viewer, player1, player2, true);
         }
         this.rounds.push(curRound);
     }
@@ -306,15 +338,24 @@ class Game {
             this.messageHandler.reqGameEnd(player1.ws, 'win');
             this.messageHandler.reqGameEnd(player2.ws, 'lose');
 
+            //for viewr
+            this.messageHandler.notiGameEnd(this.viewer, player1, player2, false);
+
         } else if (player1.win < player2.win) {
             //player2 is winner!
             this.messageHandler.reqGameEnd(player2.ws, 'win');
             this.messageHandler.reqGameEnd(player1.ws, 'lose');
 
+            //for viewr
+            this.messageHandler.notiGameEnd(this.viewer, player2, player1, false);
+
         } else {
             //draw
             this.messageHandler.reqGameEnd(player2.ws, 'draw');
             this.messageHandler.reqGameEnd(player1.ws, 'draw');
+
+            //for viewr
+            this.messageHandler.notiGameEnd(this.viewer, player1, player2, true);
         }
 
     }
