@@ -316,6 +316,18 @@ class Game {
         if (this.rounds.length >= ROUND_MAX) {
             return true;
         }
+
+        //check 3 win
+        var is3Win = false;
+        for (var player of this.players.values()) {
+            if (player.win >= 3) {
+                is3Win = true;
+                break;
+            }
+        }
+
+        if (is3Win) return true;
+
         return false;
     }
 
