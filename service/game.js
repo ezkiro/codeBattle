@@ -3,7 +3,7 @@ const Message = require('./message.js');
 const HP_MAX = 10000;
 const MATCH_MAX = 1000;
 //const MATCH_MAX = 3;
-const ROUND_MAX = 5;
+const ROUND_MAX = 11;
 
 // card1 - card2 == 10 : defense
 // card1 - card2 == -10 : attack fail
@@ -320,7 +320,7 @@ class Game {
         //check 3 win
         var is3Win = false;
         for (var player of this.players.values()) {
-            if (player.win >= 3) {
+            if (player.win >= 6) {
                 is3Win = true;
                 break;
             }
