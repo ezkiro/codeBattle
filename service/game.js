@@ -31,6 +31,9 @@ class Player {
 
     damage(point) {
         this.hp -= point;
+        if (this.hp < 0) {
+            this.hp = 0;
+        }
     }
 
     resetHp() {

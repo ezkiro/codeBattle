@@ -58,7 +58,7 @@ class Message {
         if (ws === undefined) return;
 
         var message = {"message":"NotiResult"};
-        message.result = ' Game start!! ' + players[0].name + ' vs ' + players[1].name;
+        message.result = '<h3>Game start!! ' + players[0].name + ' vs ' + players[1].name + '</h3>';
         this.sendMessage(ws, message);
     }
 
@@ -66,7 +66,7 @@ class Message {
         if (ws === undefined) return;
 
         var message = {"message":"NotiResult"};
-        message.result = ' Round:' + round + ' start!! ' + players[0].name + 'hp:' + players[0].hp + ' vs ' + players[1].name + ' hp:' + players[1].hp;
+        message.result = ' Round:' + round + ' start!! ' + players[0].name + ' hp:' + players[0].hp + ' vs ' + players[1].name + ' hp:' + players[1].hp;
         this.sendMessage(ws, message);
     }
 
@@ -79,7 +79,7 @@ class Message {
         } else {
             var winMsg = 'winner: ' + winner.name + ' win:' + winner.win + ' lose:' + winner.lose + ' draw:' + winner.draw;
             var loseMsg = 'loser:  ' + loser.name + ' win:' + loser.win + ' lose:' + loser.lose + ' draw:' + loser.draw;            
-            message.result = 'Game End! ' + winMsg + ' vs ' + loseMsg;
+            message.result = '<h3>Game End! ' + winMsg + ' vs ' + loseMsg + '</h3>';
         }
 
         this.sendMessage(ws, message);
