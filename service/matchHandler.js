@@ -135,6 +135,7 @@ function handleMessage(message, ws) {
     
         if (msgObj.message == 'ReqRegister') {
             console.log('register user:' + msgObj.name);
+
             //register user
             registerUser(msgObj.name, ws);
             response.message = 'AnsRegister';
@@ -176,7 +177,10 @@ function handleMessage(message, ws) {
 
         if (msgObj.message == 'AnsMatchStart') {
             var gameObj = findGameObj(ws);
-            gameObj.handleAnsMessage(ws, msgObj);
+            //check card validation
+            if (gameObj.checkMessageValidation(msgObj)) {
+                gameObj.handleAnsMessage(ws, msgObj);
+            }
 
             return;
         }

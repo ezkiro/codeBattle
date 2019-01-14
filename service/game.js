@@ -420,6 +420,42 @@ class Game {
             this.messageHandler.notiError(this.viewer, message.result);          
         }
     }
+
+    checkMessageValidation(message) {
+
+        if (message.message == 'AnsMatchStart') {
+            //check attack card is 5 and defense card is 5
+            var cards = message.cards;
+            if (cards == undefined) {
+                console.log('[checkMessageValidation] invalid cards! ' + cards);
+                return false;
+            }
+
+            //check size 10
+            if (cards.length != 10) {
+                console.log('[checkMessageValidation] invalid cards count:' + cards.length);                
+                return false;
+            }
+
+            //check card is 5
+            var attackCount = 0;
+            var defenseCount = 0;
+            for (var i = 0; i < 10 ; i++) {
+                if (cards[i] == 'AH' || cards[i] == 'AB' || cards[i] == 'AL') {
+                    attackCount += 1;
+                }
+                if (cards[i] == 'DH' || cards[i] == 'DB' || cards[i] == 'DL') {
+                    defenseCount += 1;
+                }
+            }
+
+            if (attackCount != 5 || defenseCount != 5) {
+                console.log('[checkMessageValidation] invalid attack:%d or defense:%d', attackCount, defenseCount); 
+                return false;
+            }
+        }
+        return true;
+    }
 }
 
 module.exports = Game;

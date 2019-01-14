@@ -33,7 +33,7 @@ $(document).ready(function(){
                 $('#players').append('<li><strong>' + htmlEncode(message.players[i]) + '</strong></li>');                
             }
         } else if (message.message == 'NotiResult') {
-            $('#notiResults').append('<li>' + htmlEncode(message.result) + '</li>');
+            $('#notiResults').append('<li>' + message.result + '</li>');
         } else if (message.message == 'NotiBattleEnd') {
             var reqPlayers = {'message':'ReqPlayers'};
             ws.send(JSON.stringify(reqPlayers));
