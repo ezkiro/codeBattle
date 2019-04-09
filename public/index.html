@@ -4,13 +4,26 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Code Battle</title>
 <meta charset="utf-8" />
+
+<script type="text/javascript">
+    window.smartlook||(function(d) {
+    var o=smartlook=function(){ o.api.push(arguments)},h=d.getElementsByTagName('head')[0];
+    var c=d.createElement('script');o.api=new Array();c.async=true;c.type='text/javascript';
+    c.charset='utf-8';c.src='https://rec.smartlook.com/recorder.js';h.appendChild(c);
+    })(document);
+    smartlook('init', '349cbddd0df54e2b7d5f6947cfff01165b993273');
+</script>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script type="text/javascript">
 
 $(document).ready(function(){
 
+    var userAgent = window.navigator.userAgent;
+    $('h1 span').text(userAgent);
+
     // Let us open a web socket
-    var ws = new WebSocket("ws://10.30.164.89:8080/view");
+    var ws = new WebSocket("ws://10.30.167.115:8080/view");
 
     ws.onopen = function()
     {
@@ -82,6 +95,7 @@ function htmlEncode(value) {
 </head>
 <body>    
 <h1>Code Battle</h1>
+<h1>userAgent: <span></span></h1>
 <hr>
 <h2>Players</h2>
 <ul id="players"></ul>
